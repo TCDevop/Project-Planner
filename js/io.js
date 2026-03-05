@@ -41,12 +41,23 @@ function lightenARGB(hex, amt) {
   return 'FF' + [lr,lg,lb].map(c => c.toString(16).padStart(2,'0')).join('');
 }
 
+// ── Prompt filename ──
+function promptFileName(defaultName, ext) {
+  const name = prompt('Nhập tên file:', defaultName);
+  if (name === null) return null; // cancelled
+  const clean = (name.trim() || defaultName).replace(/[\\/:*?"<>|]/g, '_');
+  return clean.endsWith(ext) ? clean : clean + ext;
+}
+
 // ── JSON Export ──
 function exportData() {
+  const defaultName = projectName || `project-plan-${year}`;
+  const fileName = promptFileName(defaultName, '.json');
+  if (!fileName) { closeExportMenu(); return; }
   const blob = new Blob([JSON.stringify({tasks, version:5}, null, 2)], {type:'application/json'});
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(blob),
-    download: `project-plan-${year}.json`
+    download: fileName
   });
   a.click();
   URL.revokeObjectURL(a.href);
@@ -314,11 +325,14 @@ async function exportExcel() {
   });
 
   // ═══════ Write & Download ═══════
+  const defaultName = projectName || `project-plan-${year}`;
+  const fileName = promptFileName(defaultName, '.xlsx');
+  if (!fileName) { closeExportMenu(); return; }
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `project-plan-${year}.xlsx`;
+  a.download = fileName;
   a.click();
   URL.revokeObjectURL(a.href);
   closeExportMenu();
@@ -330,6 +344,9 @@ async function exportExcel() {
 function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
+  // Lưu tên file (bỏ extension) làm tên project
+  projectName = file.name.replace(/\.[^.]+$/, '');
+  saveProjectName();
   const ext = file.name.split('.').pop().toLowerCase();
   if (ext === 'json') importJSON(file);
   else if (ext === 'xlsx' || ext === 'xls') importExcel(file);

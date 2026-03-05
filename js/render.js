@@ -236,7 +236,7 @@ function renderTimeline(grps) {
   });
   // Today line
   if (todayIdx>=0)
-    rows += `<div class="today-line" style="left:${todayIdx*COL+COL/2}px;height:${bodyH}px"></div>`;
+    rows += `<div class="today-line" style="left:${todayIdx*COL}px;height:${bodyH}px"></div>`;
 
   let y = 0;
   grps.forEach(g => {

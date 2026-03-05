@@ -217,3 +217,49 @@ document.addEventListener('wheel', e => {
   if (lb) lb.scrollTop = lbScroll;
   updateViewUI();
 }, { passive: false });
+
+// ═══════════════════════════════════════════════
+// DRAG & DROP FILE IMPORT
+// ═══════════════════════════════════════════════
+(function initFileDrop() {
+  let dragCount = 0;
+  const overlay = document.createElement('div');
+  overlay.id = 'drop-overlay';
+  overlay.innerHTML = '<div class="drop-overlay-inner"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Thả file để import</span><small>.xlsx, .xls, .json</small></div>';
+  document.body.appendChild(overlay);
+
+  document.addEventListener('dragenter', e => {
+    e.preventDefault();
+    if (!e.dataTransfer.types.includes('Files')) return;
+    dragCount++;
+    overlay.classList.add('active');
+  });
+
+  document.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dragCount--;
+    if (dragCount <= 0) { dragCount = 0; overlay.classList.remove('active'); }
+  });
+
+  document.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    dragCount = 0;
+    overlay.classList.remove('active');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['json','xlsx','xls'].includes(ext)) {
+      alert('Định dạng không hỗ trợ. Vui lòng thả file .xlsx, .xls hoặc .json');
+      return;
+    }
+    projectName = file.name.replace(/\.[^.]+$/, '');
+    saveProjectName();
+    if (ext === 'json') importJSON(file);
+    else importExcel(file);
+  });
+})();

@@ -10,6 +10,7 @@ let selectedIds = new Set();
 let zoomIdx = 9;  // index into ZOOM_LEVELS → default 42px (week)
 let colVisible = { desc:true, note:true, pic:true, status:true, from:true, to:true };
 let picList = []; // [{name, color}]
+let projectName = '';
 let selectedYears = new Set();
 let availableYears = [];
 
@@ -36,6 +37,13 @@ function loadData() {
     const sy = localStorage.getItem('pmm_years');
     if (sy) selectedYears = new Set(JSON.parse(sy));
   } catch(e) {}
+  try {
+    const pn = localStorage.getItem('pmm_projectName');
+    if (pn) projectName = pn;
+  } catch(e) {}
+}
+function saveProjectName() {
+  localStorage.setItem('pmm_projectName', projectName);
 }
 function saveData() {
   localStorage.setItem('pmm_v5', JSON.stringify({ tasks, collapsed }));
